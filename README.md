@@ -1,0 +1,2 @@
+# Godot-DocExportPlatform
+ A export platform for godot used to export formated api documents automatically during export. This plugin expects that a python executable is available to the environment under the termanal alias of python or for the python_prefix editor setting to be set. This also expects for that python environment to already have the sphinx module available when exporting formats other than rst or xml. Requires the NovaTools plugin as a dependency.
