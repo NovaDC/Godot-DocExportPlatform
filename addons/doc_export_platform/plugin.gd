@@ -43,35 +43,35 @@ var _export_platform_ref:DocEditorExportPlatform = null
 ## in the [kbd]Project > NovaTools[/kbd] menu.
 static func setup_make_rst():
 	assert(Engine.is_editor_hint())
-	
+
 	var on_conf := func(at_path:String):
 		var err :=  NovaTools.ensure_absolute_dir_exists(at_path)
 		if err != OK:
 			return err
-		
+
 		err = NovaTools.generate_version_py(at_path)
 		if err != OK:
 			return err
-		
+
 		err = await NovaTools.download_http_async(at_path.rstrip("/") + "/make_rst.py",
 											  MAKE_RST_HOST,
 											  MAKE_RST_PATH
 											 )
 		if err != OK:
 			return err
-		
+
 		err = await NovaTools.download_http_async(at_path.rstrip("/") + "/methods.py",
 											  METHODS_HOST,
 											  METHODS_PATH
 											 )
 		if err != OK:
 			return err
-		
+
 		return await NovaTools.download_http_async(at_path.rstrip("/") + "/platform_methods.py",
 											   PLATFROM_METHODS_HOST,
 											   PLATFROM_METHODS_PATH
 											  )
-	
+
 	NovaTools.quick_editor_file_dialog(on_conf, "Save Make RST To...", PackedStringArray(),
 								   MAKE_RST_DEFAULT_DOWNLOAD_PATH,
 								   EditorFileDialog.FILE_MODE_OPEN_DIR,
@@ -85,11 +85,11 @@ static func setup_make_rst():
 ## in the [kbd]Project > NovaTools[/kbd] menu.
 static func download_sphinx_conf():
 	assert(Engine.is_editor_hint())
-	
+
 	var on_conf := func (to_path:String):
 		if to_path == "":
 			return OK
-		
+
 		var down_func := NovaTools.download_http_async.bind(to_path + "/master.zip",
 														SPHINXCONF_HOST,
 														SPHINXCONF_PATH
@@ -107,9 +107,9 @@ static func download_sphinx_conf():
 													  )
 		if err != OK:
 			return err
-		
+
 		return DirAccess.remove_absolute(to_path.rstrip("/") + "/master.zip")
-	
+
 	NovaTools.quick_editor_file_dialog(on_conf,
 								   "Save Sphinx Conf To...",
 								   PackedStringArray(),

@@ -4,8 +4,8 @@ class_name DocEditorExportPlatform
 
 ## DocEditorExportPlatform
 ##
-## A export platform for godot used to export formated api documents automatically during export.
-## This plugin expects that a python executable is available to the environment under the termanal
+## A export platform for godot used to export formatted api documents automatically during export.
+## This plugin expects that a python executable is available to the environment under the terminal
 ## alias of [code]python[/code] or for the [code]python_prefix[/code] editor setting to be set.
 ## This also expects for that python environment to already have the [code]sphinx[/code] module
 ## available when exporting formats other than [code]rst[/code] or [code]xml[/code].[br]
@@ -29,7 +29,7 @@ const RST_CONVERTER_OUTPUT_FLAG := "-o"
 const RST_CONVERTER_VERBOSE_FLAG := "--verbose"
 
 ## The name of the sphinx module in python.[br]
-## Used to invode [code]sphinx-build[/code] when using the module directly as an entry point.
+## Used to invoke [code]sphinx-build[/code] when using the module directly as an entry point.
 const SPHINX_MODULE_NAME := "sphinx"
 ## The cli flag for sphinx to specify the same of the builder to use.
 const SPHINX_BUILDER_NAME_FLAG := "-M"
@@ -41,19 +41,19 @@ static func export_builtin_xml(to_path:String, include_base_types:=true,
 							   keep_open := true
 							  ) -> Error:
 	assert(Engine.is_editor_hint())
-	
+
 	NovaTools.ensure_absolute_dir_exists(to_path)
-	
+
 	var args := [GODOT_EXPORT_DOC_FLAG, to_path]
 	if not include_base_types:
 		args.append(GODOT_EXPORT_NO_BASE_TYPES_FLAG)
-	
+
 	return await NovaTools.launch_editor_instance_async(args, "", keep_open)
 
 ## Function used to export loaded gdextention xml docs.
 static func export_gdextention_xml(to_path:String, keep_open := true) -> Error:
 	assert(Engine.is_editor_hint())
-	
+
 	NovaTools.ensure_absolute_dir_exists(to_path)
 
 	var args = [GODOT_EXPORT_DOC_FLAG, to_path, GODOT_EXPORT_GDEXTENTION_FLAG]
@@ -65,7 +65,7 @@ static func export_gdscript_xml(to_path:String,
 								keep_open := true
 							   ) -> Error:
 	assert(Engine.is_editor_hint())
-	
+
 	NovaTools.ensure_absolute_dir_exists(to_path)
 
 	var args = [GODOT_EXPORT_DOC_FLAG, to_path, GODOT_EXPORT_GDSCRIPT_FLAG, from_path]
@@ -75,22 +75,22 @@ static func export_gdscript_xml(to_path:String,
 ## Function used to run [code]make_rst.py[/code].
 ## This is best used when the [code]python_prefix[/code] is set in editor settings.
 static func doc_xml_to_rst(xml_root_path:String,
-						   outpath:String,
+						   out_path:String,
 						   rst_converter_script_path:String,
 						   keep_open := true
 						  ) -> Error:
 	assert(Engine.is_editor_hint())
-	
+
 	xml_root_path = ProjectSettings.globalize_path(xml_root_path).rstrip("/")
-	outpath = ProjectSettings.globalize_path(outpath).rstrip("/")
-	
-	var err := NovaTools.ensure_absolute_dir_exists(outpath)
+	out_path = ProjectSettings.globalize_path(out_path).rstrip("/")
+
+	var err := NovaTools.ensure_absolute_dir_exists(out_path)
 	if err != OK:
 		return err
-	
+
 	var args = [xml_root_path]
 	args += Array(NovaTools.get_children_dir_recursive(xml_root_path, true))
-	args + [RST_CONVERTER_OUTPUT_FLAG, outpath, RST_CONVERTER_VERBOSE_FLAG]
+	args + [RST_CONVERTER_OUTPUT_FLAG, out_path, RST_CONVERTER_VERBOSE_FLAG]
 	var ret_code := await NovaTools.launch_python_file_async(rst_converter_script_path,
 														 args,
 														 "",
@@ -103,29 +103,29 @@ static func doc_xml_to_rst(xml_root_path:String,
 ## [code]builder_name[/code]s included by default in sphinx are listed here
 ## [url]https://www.sphinx-doc.org/en/master/usage/builders/index.html[url].
 static func doc_rst_to_other(rst_path:String,
-							 outpath:String,
+							 out_path:String,
 							 builder_name := "",
 							 conf_path := "",
 							 keep_open := true
 							) -> Error:
 	rst_path = ProjectSettings.globalize_path(rst_path)
-	outpath = ProjectSettings.globalize_path(outpath)
+	out_path = ProjectSettings.globalize_path(out_path)
 	conf_path = ProjectSettings.globalize_path(conf_path)
-	
+
 	var args := []
 	if builder_name != "":
 		args = [SPHINX_BUILDER_NAME_FLAG, builder_name]
-	args += [rst_path, outpath]
+	args += [rst_path, out_path]
 	if conf_path != "":
 		args = args + [SPHINX_CONF_DIR_FLAG, conf_path]
-	
+
 	var ret_code := await NovaTools.launch_python_module_async(SPHINX_MODULE_NAME,
 															   args,
 															   "",
 															   keep_open
 															  )
-	
 	return OK if ret_code == 0 else FAILED
+
 
 func _get_name():
 	return "Docs"
@@ -139,7 +139,7 @@ func _get_export_option_visibility(preset: EditorExportPreset, option: String) -
 		var s when s.begins_with("formats/rst/"):
 			return preset.get_or_env("formats/xml/export_as_xml", "")
 		var s when s.begins_with("formats/sphinx/"):
-			return (preset.get_or_env("formats/xml/export_as_xml", "") and 
+			return (preset.get_or_env("formats/xml/export_as_xml", "") and
 					preset.get_or_env("formats/rst/export_as_rst", "")
 				   )
 		_:
@@ -156,7 +156,7 @@ func _get_export_options():
 			"name": "domains/export_gdscript",
 			"type": TYPE_BOOL,
 			"default_value": true
-		}, 
+		},
 		{
 			"name": "domains/export_gdextention",
 			"type": TYPE_BOOL,
@@ -167,14 +167,14 @@ func _get_export_options():
 			"type": TYPE_BOOL,
 			"default_value": true
 		},
-		
+
 		{
 			"name": "formats/xml/export_as_xml",
 			"type": TYPE_BOOL,
 			"default_value": true,
 			"update_visibility": true
 		},
-		
+
 		{
 			"name": "formats/rst/export_as_rst",
 			"type": TYPE_BOOL,
@@ -187,7 +187,7 @@ func _get_export_options():
 			"hint": PROPERTY_HINT_FILE,
 			"default_value": DocExportPlatformPlugin.MAKE_RST_DEFAULT_DOWNLOAD_PATH
 		},
-		
+
 		{
 			"name": "formats/sphinx/export_as_other_formats",
 			"type": TYPE_ARRAY,
@@ -229,21 +229,21 @@ func _has_valid_project_configuration(preset: EditorExportPreset):
 
 func _export_hook(preset: EditorExportPreset, path: String):
 	path = ProjectSettings.globalize_path("res://" + path)
-	
+
 	var keep_open:bool = preset.get_or_env("keep_console_open", "")
-	
-	#resolved paths for the exports of certian formats,
+
+	#resolved paths for the exports of certain formats,
 	#regardless or weather or not they are desired
 	var xml_path := path.path_join("xml")
 	var rst_path := path.path_join("rst")
-	
+
 	#actually desired outputs, not including the ones made for the sake of further generation
 	var want_xml := preset.get_or_env("formats/rst/export_as_xml", "")
 	var want_rst := preset.get_or_env("formats/rst/export_as_rst", "")
 	var wanted_sphinx_builds = preset.get_or_env("formats/sphinx/export_as_other_formats", "")
-	
+
 	var err := OK
-	
+
 	#as we know we aren't running with no desired outputs and all steps originate from xml,
 	#no need to check
 	if preset.get_or_env("domains/export_gdscript", ""):
@@ -261,7 +261,7 @@ func _export_hook(preset: EditorExportPreset, path: String):
 		err = await export_builtin_xml(xml_path, keep_open)
 		if err != OK:
 			return err
-	
+
 	if want_rst or wanted_sphinx_builds.size() > 0:
 		err = await doc_xml_to_rst(xml_path,
 								   rst_path,
@@ -272,7 +272,7 @@ func _export_hook(preset: EditorExportPreset, path: String):
 								  )
 		if err != OK:
 			return err
-	
+
 	for sphinx_format in wanted_sphinx_builds:
 		var sphinx_format_stripped = sphinx_format.replace("/", "").replace(" ", "").to_lower()
 		var sphinx_path := path.path_join(sphinx_format_stripped)
@@ -284,15 +284,15 @@ func _export_hook(preset: EditorExportPreset, path: String):
 									)
 		if err != OK:
 			return err
-	
+
 	if not want_xml and DirAccess.dir_exists_absolute(xml_path):
 		err = DirAccess.remove_absolute(xml_path)
 		if err != OK:
 			return err
-	
+
 	if not want_rst and DirAccess.dir_exists_absolute(rst_path):
 		err = DirAccess.remove_absolute(rst_path)
 		if err != OK:
 			return err
-	
+
 	return OK
