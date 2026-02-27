@@ -30,11 +30,11 @@ const RST_CONVERTER_VERBOSE_FLAG := "--verbose"
 
 ## The name of the sphinx module in python.[br]
 ## Used to invode [code]sphinx-build[/code] when using the module directly as an entry point.
-const sphinx_MODULE_NAME := "sphinx"
+const SPHINX_MODULE_NAME := "sphinx"
 ## The cli flag for sphinx to specify the same of the builder to use.
-const sphinx_BUILDERNAME_FLAG := "-M"
+const SPHINX_BUILDER_NAME_FLAG := "-M"
 ## The cli flag for sphinx to manually specify the configuration directory location.
-const sphinx_CONF_DIR_FLAG := "--conf-dir"
+const SPHINX_CONF_DIR_FLAG := "--conf-dir"
 
 ## Function used to export builtin xml docs.
 static func export_builtin_xml(to_path:String, include_base_types:=true,
@@ -114,12 +114,12 @@ static func doc_rst_to_other(rst_path:String,
 	
 	var args := []
 	if builder_name != "":
-		args = [sphinx_BUILDERNAME_FLAG, builder_name]
+		args = [SPHINX_BUILDER_NAME_FLAG, builder_name]
 	args += [rst_path, outpath]
 	if conf_path != "":
-		args = args + [sphinx_CONF_DIR_FLAG, conf_path]
+		args = args + [SPHINX_CONF_DIR_FLAG, conf_path]
 	
-	var ret_code := await NovaTools.launch_python_module_async(sphinx_MODULE_NAME,
+	var ret_code := await NovaTools.launch_python_module_async(SPHINX_MODULE_NAME,
 															   args,
 															   "",
 															   keep_open
