@@ -2,10 +2,8 @@
 class_name DocExportPlatformPlugin
 extends EditorPlugin
 
-## The http host to download the default [code]sphinx_conf[/code] from.
-const SPHINXCONF_HOST := "https://codeload.github.com"
-## The http path to download the default [code]sphinx_conf[/code] from.
-const SPHINXCONF_PATH := "/godotengine/godot-docs/zip/refs/heads/master"
+## The internal name of this plugin.
+const PLUGIN_NAME_INTERNAL := "doc_export_platform"
 
 ## The http host to download the default [code]make_rst.py[/code] file from.
 const MAKE_RST_HOST := "https://raw.githubusercontent.com"
@@ -19,15 +17,19 @@ const METHODS_HOST := "https://raw.githubusercontent.com"
 const METHODS_PATH := "/godotengine/godot/refs/heads/master/methods.py"
 ## The http host to download the default [code]platform_methods.py[/code] file
 ## from (dependency of [code]make_rst.py[/code]).
-const PLATFROM_METHODS_HOST := "https://raw.githubusercontent.com"
+const PLATFORM_METHODS_HOST := "https://raw.githubusercontent.com"
 ## The http path to download the default [code]platform_methods.py[/code] file
 ## from (dependency of [code]make_rst.py[/code]).
-const PLATFROM_METHODS_PATH := "/godotengine/godot/refs/heads/master/platform_methods.py"
+const PLATFORM_METHODS_PATH := "/godotengine/godot/refs/heads/master/platform_methods.py"
+## The http host to download the default [code]sphinx_conf[/code] from.
+const SPHINXCONF_HOST := "https://codeload.github.com"
+## The http path to download the default [code]sphinx_conf[/code] from.
+const SPHINXCONF_PATH := "/godotengine/godot-docs/zip/refs/heads/master"
 
-const PLUGIN_NAME := "doc_export_platform"
-## The internal name of this plugin.
-
-var _export_platform_ref:DocEditorExportPlatform = null
+## The name that [method setup_make_rst] is associated to in the editor's tool menu.
+const DOWNLOAD_MAKE_RST_TOOL_NAME := "Download rst Document Generator..."
+## The name that [method download_sphinx_conf] is associated to in the editor's tool menu.
+const DOWNLOAD_DEFAULT_SPHINX_TOOL_NAME := "Download Default Sphinx Configuration..."
 
 const _MAKE_RST_DOWNLOAD_PATH_DEFAULT := "res://doc_export/make_rst.py"
 const _SPHINX_CONF_DOWNLOAD_PATH_DEFAULT := "res://doc_export/"
@@ -35,30 +37,11 @@ const _SPHINX_CONF_DOWNLOAD_PATH_DEFAULT := "res://doc_export/"
 const _MAKE_RST_DOWNLOAD_PATH_SETTING_NAME = PLUGIN_NAME_INTERNAL + "/make_rst_download_path"
 const _SPHINX_CONF_DOWNLOAD_PATH_SETTING_NAME = PLUGIN_NAME_INTERNAL + "/sphinx_conf_download_path"
 
-static func _add_project_setting(name:String, type:Variant.Type, default:Variant = null, hint := PROPERTY_HINT_NONE, hint_string := "", basic := true) -> bool:
-	if ProjectSettings.has_setting(name):
-		return false
+var _export_platform_ref:DocEditorExportPlatform = null
 
-	ProjectSettings.set_setting(name, default)
-	ProjectSettings.add_property_info({
-		"name" : name,
-		"type" : type,
-		"hint" : hint,
-		"hint_string" : hint_string,
-	})
-	ProjectSettings.set_as_basic(name, basic)
-	ProjectSettings.set_initial_value(name, default)
-
-	return true
-
-static func _try_remove_project_setting(name:String) -> bool:
-	if not ProjectSettings.has_setting(name):
-		return false
-	ProjectSettings.set_setting(name, null)
-	return true
-
-## Return the path that [code]make_rst.py[/code] should be downloaded to, using the setting in [ProjectSettings]
-## if possible, or falling back to the default in cases where the path is invalid or unset.
+## Return the path that [code]make_rst.py[/code] should be downloaded to,
+## using the setting in [ProjectSettings] if possible,
+## or falling back to the default in cases where the path is invalid or unset.
 static func get_make_rst_download_path() -> String:
 	var ret = _MAKE_RST_DOWNLOAD_PATH_DEFAULT
 	if ProjectSettings.has_setting(_MAKE_RST_DOWNLOAD_PATH_SETTING_NAME):
@@ -68,8 +51,9 @@ static func get_make_rst_download_path() -> String:
 			ret = _MAKE_RST_DOWNLOAD_PATH_DEFAULT
 	return ret
 
-## Return the path that Godot's sphinx conf should be downloaded to, using the setting in [ProjectSettings]
-## if possible, or falling back to the default in cases where the path is invalid or unset.
+## Return the path that Godot's sphinx conf should be downloaded to,
+## using the setting in [ProjectSettings] if possible,
+##  or falling back to the default in cases where the path is invalid or unset.
 static func get_sphinx_conf_download_path() -> String:
 	var ret = _SPHINX_CONF_DOWNLOAD_PATH_DEFAULT
 	if ProjectSettings.has_setting(_SPHINX_CONF_DOWNLOAD_PATH_SETTING_NAME):
@@ -95,7 +79,7 @@ static func setup_make_rst():
 
 		at_path = NovaTools.normalize_path_absolute(at_path, false)
 
-		var err :=  NovaTools.ensure_absolute_dir_exists(at_path)
+		var err := NovaTools.ensure_absolute_dir_exists(at_path)
 		if err != OK:
 			return err
 
@@ -104,29 +88,29 @@ static func setup_make_rst():
 			return err
 
 		err = await NovaTools.download_http_async(at_path.rstrip("/") + "/make_rst.py",
-											  MAKE_RST_HOST,
-											  MAKE_RST_PATH
-											 )
+													MAKE_RST_HOST,
+													MAKE_RST_PATH
+													)
 		if err != OK:
 			return err
 
 		err = await NovaTools.download_http_async(at_path.rstrip("/") + "/methods.py",
-											  METHODS_HOST,
-											  METHODS_PATH
-											 )
+													METHODS_HOST,
+													METHODS_PATH
+													)
 		if err != OK:
 			return err
 
 		return await NovaTools.download_http_async(at_path.rstrip("/") + "/platform_methods.py",
-											   PLATFROM_METHODS_HOST,
-											   PLATFROM_METHODS_PATH
-											  )
+													PLATFORM_METHODS_HOST,
+													PLATFORM_METHODS_PATH
+													)
 
 	NovaTools.quick_editor_file_dialog(on_conf, "Save Make RST To...", PackedStringArray(),
-								   get_make_rst_download_path(),
-								   EditorFileDialog.FILE_MODE_OPEN_DIR,
-								   EditorFileDialog.ACCESS_RESOURCES
-								  )
+										get_make_rst_download_path(),
+										EditorFileDialog.FILE_MODE_OPEN_DIR,
+										EditorFileDialog.ACCESS_RESOURCES
+										)
 
 ## A builtin function that downloads the default latest
 ## [code]godot-docs[/code] [code]sphinx_conf[/code]
@@ -144,42 +128,71 @@ static func download_sphinx_conf():
 		to_path = NovaTools.normalize_path_absolute(to_path, false)
 
 		var down_func := NovaTools.download_http_async.bind(to_path + "/master.zip",
-														SPHINXCONF_HOST,
-														SPHINXCONF_PATH
-													   )
+															SPHINXCONF_HOST,
+															SPHINXCONF_PATH
+															)
 		var err := await NovaTools.show_wait_window_while_async("Please wait for the download...",
-															down_func
-														   )
+																	down_func
+																	)
 		if err != OK:
 			return err
 		var decomp_func := NovaTools.decompress_zip_async.bind(to_path + "/master.zip",
-														   to_path + "/"
-														  )
+																to_path + "/"
+																)
 		err = await NovaTools.show_wait_window_while_async("Please wait for decompression...",
-													   decomp_func
-													  )
+															decomp_func
+															)
 		if err != OK:
 			return err
 
 		return DirAccess.remove_absolute(to_path.rstrip("/") + "/master.zip")
 
 	NovaTools.quick_editor_file_dialog(on_conf,
-								   "Save Sphinx Conf To...",
-								   PackedStringArray(),
-								   get_sphinx_conf_download_path(),
-								   EditorFileDialog.FILE_MODE_OPEN_DIR,
-								   EditorFileDialog.ACCESS_RESOURCES
-								  )
+								"Save Sphinx Conf To...",
+								PackedStringArray(),
+								get_sphinx_conf_download_path(),
+								EditorFileDialog.FILE_MODE_OPEN_DIR,
+								EditorFileDialog.ACCESS_RESOURCES
+								)
 
+static func _add_project_setting(name:String,
+									type:Variant.Type,
+									default:Variant = null,
+									hint := PROPERTY_HINT_NONE,
+									hint_string := "",
+									basic := true
+								) -> bool:
+	if ProjectSettings.has_setting(name):
+		return false
+
+	ProjectSettings.set_setting(name, default)
+	ProjectSettings.add_property_info(
+		{
+			"name" : name,
+			"type" : type,
+			"hint" : hint,
+			"hint_string" : hint_string,
+		}
+	)
+	ProjectSettings.set_as_basic(name, basic)
+	ProjectSettings.set_initial_value(name, default)
+
+	return true
+
+static func _try_remove_project_setting(name:String) -> bool:
+	if not ProjectSettings.has_setting(name):
+		return false
+	ProjectSettings.set_setting(name, null)
+	return true
 
 func _get_plugin_name():
-	return PLUGIN_NAME
+	return PLUGIN_NAME_INTERNAL
 
 func _get_plugin_icon():
 	return NovaTools.get_editor_icon_named("Help", Vector2i.ONE * 16)
 
 func _enter_tree():
-	if EditorInterface.is_plugin_enabled(PLUGIN_NAME):
+	if EditorInterface.is_plugin_enabled(PLUGIN_NAME_INTERNAL):
 		_try_init_platform()
 
 func _enable_plugin():
@@ -198,15 +211,15 @@ func _try_init_platform():
 							_MAKE_RST_DOWNLOAD_PATH_DEFAULT,
 							PROPERTY_HINT_GLOBAL_SAVE_FILE,
 							"*.py"
-	)
+						)
 	_add_project_setting(_SPHINX_CONF_DOWNLOAD_PATH_SETTING_NAME,
 							TYPE_STRING,
 							_SPHINX_CONF_DOWNLOAD_PATH_DEFAULT,
 							PROPERTY_HINT_GLOBAL_DIR,
-	)
+						)
 	if _export_platform_ref == null:
-		add_tool_menu_item("Download rst Document Genorator...", setup_make_rst)
-		add_tool_menu_item("Download Default Sphinx Configuration...", download_sphinx_conf)
+		add_tool_menu_item(DOWNLOAD_MAKE_RST_TOOL_NAME, setup_make_rst)
+		add_tool_menu_item(DOWNLOAD_DEFAULT_SPHINX_TOOL_NAME, download_sphinx_conf)
 		_export_platform_ref = DocEditorExportPlatform.new()
 		add_export_platform(_export_platform_ref)
 
@@ -215,7 +228,7 @@ func _try_deinit_platform():
 	_try_remove_project_setting(_MAKE_RST_DOWNLOAD_PATH_SETTING_NAME)
 	_try_remove_project_setting(_SPHINX_CONF_DOWNLOAD_PATH_SETTING_NAME)
 	if _export_platform_ref != null:
-		remove_tool_menu_item("Download rst document genorator...")
-		remove_tool_menu_item("Download default sphinx configuration...")
+		remove_tool_menu_item(DOWNLOAD_MAKE_RST_TOOL_NAME)
+		remove_tool_menu_item(DOWNLOAD_DEFAULT_SPHINX_TOOL_NAME)
 		remove_export_platform(_export_platform_ref)
 		_export_platform_ref = null
