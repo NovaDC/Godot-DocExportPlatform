@@ -160,10 +160,15 @@ static func doc_rst_to_other(rst_path:String,
 
 	if not builder_name.is_empty():
 		builder_name = builder_name.strip_edges().strip_escapes()
+		if builder_name.is_empty():
+			return ERR_INVALID_PARAMETER
 
 	rst_path = NovaTools.normalize_path_absolute(rst_path, false)
 	out_path = NovaTools.normalize_path_absolute(out_path, false)
 	conf_path = NovaTools.normalize_path_absolute(conf_path, false)
+
+	if conf_path.is_empty() or not DirAccess.dir_exists_absolute(conf_path):
+		return ERR_DOES_NOT_EXIST
 
 	var args := []
 	if builder_name != "":
@@ -328,7 +333,7 @@ func _export_hook(preset: EditorExportPreset, path: String):
 	var want_rst := preset.get_or_env("formats/rst/export_as_rst", "")
 	var wanted_sphinx_builds := _normalize_wanted_sphinx_builds(preset)
 
-	var err := OK
+	var err:int = OK
 
 	#as we know we aren't running with no desired outputs and all steps originate from xml,
 	#no need to check
