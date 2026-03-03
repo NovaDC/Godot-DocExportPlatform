@@ -215,7 +215,7 @@ func _get_export_options():
 			"name": "formats/rst/make_rst_script_path",
 			"type": TYPE_STRING,
 			"hint": PROPERTY_HINT_FILE,
-			"default_value": DocExportPlatformPlugin.MAKE_RST_DEFAULT_DOWNLOAD_PATH
+			"default_value": DocExportPlatformPlugin.get_make_rst_download_path()
 		},
 
 		{
@@ -229,7 +229,7 @@ func _get_export_options():
 			"name": "formats/sphinx/sphinx_conf_path",
 			"type": TYPE_STRING,
 			"hint": PROPERTY_HINT_DIR,
-			"default_value": DocExportPlatformPlugin.SPHINX_CONF_DEFAULT_DOWNLOAD_PATH
+			"default_value": DocExportPlatformPlugin.get_sphinx_conf_download_path()
 		},
 	] + super._get_export_options()
 
