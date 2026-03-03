@@ -24,8 +24,8 @@ const PLATFROM_METHODS_HOST := "https://raw.githubusercontent.com"
 ## from (dependency of [code]make_rst.py[/code]).
 const PLATFROM_METHODS_PATH := "/godotengine/godot/refs/heads/master/platform_methods.py"
 
-## The name of this plugin.
 const PLUGIN_NAME := "doc_export_platform"
+## The internal name of this plugin.
 
 var _export_platform_ref:DocEditorExportPlatform = null
 
@@ -57,6 +57,8 @@ static func _try_remove_project_setting(name:String) -> bool:
 	ProjectSettings.set_setting(name, null)
 	return true
 
+## Return the path that [code]make_rst.py[/code] should be downloaded to, using the setting in [ProjectSettings]
+## if possible, or falling back to the default in cases where the path is invalid or unset.
 static func get_make_rst_download_path() -> String:
 	var ret = _MAKE_RST_DOWNLOAD_PATH_DEFAULT
 	if ProjectSettings.has_setting(_MAKE_RST_DOWNLOAD_PATH_SETTING_NAME):
@@ -66,6 +68,8 @@ static func get_make_rst_download_path() -> String:
 			ret = _MAKE_RST_DOWNLOAD_PATH_DEFAULT
 	return ret
 
+## Return the path that Godot's sphinx conf should be downloaded to, using the setting in [ProjectSettings]
+## if possible, or falling back to the default in cases where the path is invalid or unset.
 static func get_sphinx_conf_download_path() -> String:
 	var ret = _SPHINX_CONF_DOWNLOAD_PATH_DEFAULT
 	if ProjectSettings.has_setting(_SPHINX_CONF_DOWNLOAD_PATH_SETTING_NAME):
@@ -77,9 +81,9 @@ static func get_sphinx_conf_download_path() -> String:
 
 ## A builtin function that downloads [code]make_rst.py[/code]
 ## (and it's dependencies, [code]methods.py[/code] and [code]platform_methods.py[/code]) to
-## and generares an appropriate [code]version.py[/code] file in
+## and generates an appropriate [code]version.py[/code] file in
 ## a location determined by a file selector.[br]
-## This command is effectively the equivlent to clicking the setup make rst command
+## This command is effectively the equivalent to clicking the setup make rst command
 ## in the [kbd]Project > NovaTools[/kbd] menu.
 static func setup_make_rst():
 	if not Engine.is_editor_hint():
@@ -127,7 +131,7 @@ static func setup_make_rst():
 ## A builtin function that downloads the default latest
 ## [code]godot-docs[/code] [code]sphinx_conf[/code]
 ## file to a location determined from a file selector popup.[br]
-## This command is effectively the equivlent to clicking the setup sphinx conf command
+## This command is effectively the equivalent to clicking the setup sphinx conf command
 ## in the [kbd]Project > NovaTools[/kbd] menu.
 static func download_sphinx_conf():
 	if not Engine.is_editor_hint():

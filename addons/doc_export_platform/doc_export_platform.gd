@@ -35,6 +35,7 @@ const SPHINX_MODULE_NAME := "sphinx"
 const SPHINX_BUILDER_NAME_FLAG := "-M"
 ## The cli flag for sphinx to manually specify the configuration directory location.
 const SPHINX_CONF_DIR_FLAG := "--conf-dir"
+## A list of select preinstalled sphinx builders to use for inspector suggestions.
 const SPHINX_COMMON_FORMATS := ["applehelp",
 									"devhelp",
 									"dirhtml",
@@ -50,6 +51,9 @@ const SPHINX_COMMON_FORMATS := ["applehelp",
 									"text",
 									]
 
+## Maps Godot's exit codes (the exit code returned when running as a subprocess)
+## to the in engine [enum Error] codes.[br]
+## This will always return [constant Error.OK] if the process seceded.
 static func godot_exit_as_gd_error(exit_code:int) -> int:
 	match(exit_code):
 		0:
@@ -57,6 +61,9 @@ static func godot_exit_as_gd_error(exit_code:int) -> int:
 		_:
 			return FAILED
 
+## Maps the make_rst script's exit codes (the exit code returned when running as a subprocess)
+## to the in engine [enum Error] codes.[br]
+## This will always return [constant Error.OK] if the process seceded.
 static func xml_to_rst_exit_as_gd_error(exit_code:int) -> int:
 	match(exit_code):
 		0:
@@ -64,6 +71,9 @@ static func xml_to_rst_exit_as_gd_error(exit_code:int) -> int:
 		_:
 			return FAILED
 
+## Maps sphinx's exit codes (the exit code returned when running as a subprocess)
+## to the in engine [enum Error] codes.[br]
+## This will always return [constant Error.OK] if the process seceded.
 static func sphinx_exit_as_gd_error(exit_code:int) -> int:
 	match(exit_code):
 		0:
@@ -71,8 +81,13 @@ static func sphinx_exit_as_gd_error(exit_code:int) -> int:
 		_:
 			return FAILED
 
-## Function used to export builtin xml docs.
-static func export_builtin_xml(to_path:String, include_base_types:=true,
+## A function used to export builtin xml docs.[br]
+## [param to_path] is the directory the builtin's xml docs will be exported to.[br]
+## If [param include_base_types] is set, base [Variant] type's docs will also be exported.[br]
+## If [param keep_open] is set, the terminal window will not automaticaly close,
+## instead waiting for the user to close it.
+static func export_builtin_xml(to_path:String,
+								include_base_types:=true,
 							   keep_open := true
 							  ) -> Error:
 	if not Engine.is_editor_hint():
@@ -87,8 +102,12 @@ static func export_builtin_xml(to_path:String, include_base_types:=true,
 	var ret_code = await NovaTools.launch_editor_instance_async(args, "", keep_open)
 	return godot_exit_as_gd_error(ret_code)
 
-## Function used to export loaded gdextention xml docs.
-# TODO Doc better
+## Function used to export loaded gdextention xml docs.[br]
+## There is currently no way to select certain loaded GDExtensions.[br]
+## [param to_path] is the directory all loaded gdextention's xml docs
+## will be exported to.[br]
+## If [param keep_open] is set, the terminal window will not automaticaly close,
+## instead waiting for the user to close it.
 static func export_gdextention_xml(to_path:String, keep_open := true) -> Error:
 	if not Engine.is_editor_hint():
 		return ERR_UNAVAILABLE
@@ -99,7 +118,13 @@ static func export_gdextention_xml(to_path:String, keep_open := true) -> Error:
 	var ret_code = await NovaTools.launch_editor_instance_async(args, "", keep_open)
 	return godot_exit_as_gd_error(ret_code)
 
-## Function used to export loaded gdscript xml docs.
+## Function used to export loaded gdscript xml docs.[br]
+## [param to_path] is the directory all relevant gdscript's xml docs
+## will be exported to.[br]
+## [param from_path] is the base directory for all gdscripts that will be documented.
+## If this is set to the root of the project (as is by default), all gdscripts will be documented.[br]
+## If [param keep_open] is set, the terminal window will not automaticaly close,
+## instead waiting for the user to close it.
 static func export_gdscript_xml(to_path:String,
 								from_path := NovaTools.normalize_path_absolute("res://", false),
 								keep_open := true
@@ -113,8 +138,13 @@ static func export_gdscript_xml(to_path:String,
 	var ret_code = await NovaTools.launch_editor_instance_async(args, "", keep_open)
 	return godot_exit_as_gd_error(ret_code)
 
-## Function used to run [code]make_rst.py[/code].
-## This is best used when the [code]python_prefix[/code] is set in editor settings.
+## Function used to run [code]make_rst.py[/code].[br]
+## [param xml_root_path] is the root directory of the xml docs to convert.[br]
+## [param out_path] is the directory that the rst docs will be placed in.[br]
+## [param make_rst_script_path] is path to the [code]make_rst.py[/code] file itself.[br]
+## If [param keep_open] is set, the terminal window will not automaticaly close,
+## instead waiting for the user to close it.[br]
+## Errors may occur if [code]python_prefix[/code] is not set in [EditorSettings].
 static func doc_xml_to_rst(xml_root_path:String,
 						   out_path:String,
 						   make_rst_script_path:String,
@@ -145,10 +175,18 @@ static func doc_xml_to_rst(xml_root_path:String,
 														)
 	return xml_to_rst_exit_as_gd_error(ret_code)
 
-## Function used to run [code]sphinx[/code] on generated rst documents.
-## This is best used when the [code]python_prefix[/code] is set in editor settings.
-## [code]builder_name[/code]s included by default in sphinx are listed here
-## [url]https://www.sphinx-doc.org/en/master/usage/builders/index.html[url].
+## Function used to run [code]sphinx[/code] on generated rst documents.[br]
+## [param rst_path] is the root directory of the rst docs to convert.[br]
+## [param out_path] is the directory that the converted will be placed in.[br]
+## [param builder_name] is the specific name of the sphinx builder to use for doc conversion.
+## [param builder_name]s included by default in sphinx are listed here
+## [url]https://www.sphinx-doc.org/en/master/usage/builders/index.html[url], and
+## all installed sphinx extensions should also work as is.[br]
+## [param conf_path] is the directory to the sphinx conf to use when converting.
+## Note that godot's docs may not properly convert without a sphinx conf that
+## accounts for the specific markup used.
+## A good choice would be to use the sphinx conf already used by Godot's docs.[br]
+## Errors may occur if [code]python_prefix[/code] is not set in [EditorSettings].
 static func doc_rst_to_other(rst_path:String,
 							 out_path:String,
 							 builder_name := "",
