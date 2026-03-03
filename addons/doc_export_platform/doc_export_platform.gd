@@ -35,6 +35,20 @@ const SPHINX_MODULE_NAME := "sphinx"
 const SPHINX_BUILDER_NAME_FLAG := "-M"
 ## The cli flag for sphinx to manually specify the configuration directory location.
 const SPHINX_CONF_DIR_FLAG := "--conf-dir"
+const SPHINX_COMMON_FORMATS := ["applehelp",
+									"devhelp",
+									"dirhtml",
+									"epub",
+									"gettext",
+									"html",
+									"htmlhelp",
+									"latex",
+									"man",
+									"qthelp",
+									"singlehtml",
+									"texinfo",
+									"text",
+									]
 
 static func godot_exit_as_gd_error(exit_code:int) -> int:
 	match(exit_code):
@@ -222,7 +236,10 @@ func _get_export_options():
 			"name": "formats/sphinx/export_as_other_formats",
 			"type": TYPE_ARRAY,
 			"hint": PROPERTY_HINT_TYPE_STRING,
-			"hint_string": "%d:"%[TYPE_STRING],
+			"hint_string": "%d/%d:%s" % [TYPE_STRING,
+											PROPERTY_HINT_ENUM_SUGGESTION,
+											",".join(SPHINX_COMMON_FORMATS)
+											],
 			"default_value": []
 		},
 		{
