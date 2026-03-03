@@ -117,7 +117,7 @@ static func export_gdscript_xml(to_path:String,
 ## This is best used when the [code]python_prefix[/code] is set in editor settings.
 static func doc_xml_to_rst(xml_root_path:String,
 						   out_path:String,
-						   rst_converter_script_path:String,
+						   make_rst_script_path:String,
 						   keep_open := true
 						  ) -> Error:
 	if not Engine.is_editor_hint():
@@ -126,6 +126,10 @@ static func doc_xml_to_rst(xml_root_path:String,
 
 	xml_root_path = NovaTools.normalize_path_absolute(xml_root_path, false)
 	out_path = NovaTools.normalize_path_absolute(out_path, false)
+	make_rst_script_path = NovaTools.normalize_path_absolute(make_rst_script_path, false)
+
+	if make_rst_script_path.is_empty() or not FileAccess.file_exists(make_rst_script_path):
+		return ERR_FILE_NOT_FOUND
 
 	var err := NovaTools.ensure_absolute_dir_exists(out_path)
 	if err != OK:
@@ -134,7 +138,7 @@ static func doc_xml_to_rst(xml_root_path:String,
 	var args = [xml_root_path]
 	args += Array(NovaTools.get_children_dir_recursive(xml_root_path, true))
 	args + [RST_CONVERTER_OUTPUT_FLAG, out_path, RST_CONVERTER_VERBOSE_FLAG]
-	var ret_code := await NovaTools.launch_python_file_async(rst_converter_script_path,
+	var ret_code := await NovaTools.launch_python_file_async(make_rst_script_path,
 														 args,
 														 "",
 														 keep_open
@@ -153,6 +157,10 @@ static func doc_rst_to_other(rst_path:String,
 							) -> Error:
 	if not Engine.is_editor_hint():
 		return ERR_UNAVAILABLE
+
+	if not builder_name.is_empty():
+		builder_name = builder_name.strip_edges().strip_escapes()
+
 	rst_path = NovaTools.normalize_path_absolute(rst_path, false)
 	out_path = NovaTools.normalize_path_absolute(out_path, false)
 	conf_path = NovaTools.normalize_path_absolute(conf_path, false)
@@ -250,8 +258,20 @@ func _get_export_options():
 		},
 	] + super._get_export_options()
 
+func _get_export_option_warning(preset: EditorExportPreset, option: StringName) -> String:
+	match (option):
+		"formats/sphinx/export_as_other_formats":
+			var sphinx_formats := _normalize_wanted_sphinx_builds(preset)
+			if "xml" in sphinx_formats or "pseudoxml" in sphinx_formats:
+				return "Note that xml and pseudoxml formats provided by sphinx are not the same as godot's xml formatting."
+	return ""
+
 func _has_valid_project_configuration(preset: EditorExportPreset):
 	var is_valid := true
+	var using_sphinx:bool = _normalize_wanted_sphinx_builds(preset).size() > 0
+	var sphinx_conf_path := NovaTools.normalize_path_absolute(preset.get_or_env("formats/sphinx/sphinx_conf_path", ""), false)
+	var make_rst_script_path := NovaTools.normalize_path_absolute(preset.get_or_env("formats/rst/make_rst_script_path", ""), false)
+
 	if not (preset.get_or_env("domains/export_gdscript", "")
 			or preset.get_or_env("domains/export_gdextention", "")
 			or preset.get_or_env("domains/export_builtin", "")
@@ -260,22 +280,41 @@ func _has_valid_project_configuration(preset: EditorExportPreset):
 		is_valid = false
 	if not (preset.get_or_env("formats/xml/export_as_xml", "")
 			or preset.get_or_env("formats/rst/export_as_rst", "")
-			or preset.get_or_env("formats/sphinx/export_as_other_formats", "").size() > 0
+			or using_sphinx
 		   ):
 		add_config_error("Must export at least one format of docs.")
 		is_valid = false
-	if preset.get_or_env("formats/sphinx/export_as_other_formats", "").size() > 0 and (
-							 preset.get_or_env("formats/sphinx/sphinx_conf_path", "") is not String
-							 or not DirAccess.dir_exists_absolute(
-											preset.get_or_env("formats/sphinx/sphinx_conf_path", "")
-							 									 )
-																					  ):
-		add_config_error("Invalid sphinx conf path.")
+
+	if preset.get_or_env("formats/rst/export_as_rst", "") and (make_rst_script_path.is_empty() or
+							not FileAccess.file_exists(make_rst_script_path)
+						):
+		add_config_error("Invalid make_rst script path. Ensure this tool is installed.")
 		is_valid = false
+	if using_sphinx and (sphinx_conf_path.is_empty() or
+							not DirAccess.dir_exists_absolute(sphinx_conf_path)
+						):
+		add_config_error("Invalid sphinx conf path. Ensure this tool is installed.")
+		is_valid = false
+
 	return is_valid
 
+func _normalize_wanted_sphinx_builds(preset:EditorExportPreset) -> PackedStringArray:
+	var builds = preset.get_or_env("formats/sphinx/export_as_other_formats", "")
+	match(typeof(builds)):
+		TYPE_NIL, TYPE_MAX:
+			return PackedStringArray()
+		TYPE_PACKED_STRING_ARRAY:
+			builds = Array(builds)
+		var t when NovaTools.typeof_is_any_array(t):
+			builds = Array(builds.map(str))
+		_:
+			builds = [str(builds)]
+	builds = builds.map(func (b): return b.strip_escapes().strip_edges())
+	builds = builds.filter(func (b): return not b.is_empty())
+	return PackedStringArray(builds)
+
 func _export_hook(preset: EditorExportPreset, path: String):
-	path = ProjectSettings.globalize_path("res://" + path)
+	path = NovaTools.normalize_path_absolute("res://".path_join(path), false)
 
 	var keep_open:bool = preset.get_or_env("keep_console_open", "")
 
@@ -287,7 +326,7 @@ func _export_hook(preset: EditorExportPreset, path: String):
 	#actually desired outputs, not including the ones made for the sake of further generation
 	var want_xml := preset.get_or_env("formats/rst/export_as_xml", "")
 	var want_rst := preset.get_or_env("formats/rst/export_as_rst", "")
-	var wanted_sphinx_builds = preset.get_or_env("formats/sphinx/export_as_other_formats", "")
+	var wanted_sphinx_builds := _normalize_wanted_sphinx_builds(preset)
 
 	var err := OK
 
