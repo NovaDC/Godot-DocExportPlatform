@@ -137,7 +137,7 @@ static func doc_xml_to_rst(xml_root_path:String,
 
 	var args = [xml_root_path]
 	args += Array(NovaTools.get_children_dir_recursive(xml_root_path, true))
-	args + [RST_CONVERTER_OUTPUT_FLAG, out_path, RST_CONVERTER_VERBOSE_FLAG]
+	args += [RST_CONVERTER_OUTPUT_FLAG, out_path, RST_CONVERTER_VERBOSE_FLAG]
 	var ret_code := await NovaTools.launch_python_file_async(make_rst_script_path,
 														 args,
 														 "",
