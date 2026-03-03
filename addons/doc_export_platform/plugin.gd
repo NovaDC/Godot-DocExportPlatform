@@ -46,6 +46,11 @@ static func setup_make_rst():
 		return ERR_UNAVAILABLE
 
 	var on_conf := func(at_path:String):
+		if at_path == "":
+			return OK
+
+		at_path = NovaTools.normalize_path_absolute(at_path, false)
+
 		var err :=  NovaTools.ensure_absolute_dir_exists(at_path)
 		if err != OK:
 			return err
@@ -91,6 +96,8 @@ static func download_sphinx_conf():
 	var on_conf := func (to_path:String):
 		if to_path == "":
 			return OK
+
+		to_path = NovaTools.normalize_path_absolute(to_path, false)
 
 		var down_func := NovaTools.download_http_async.bind(to_path + "/master.zip",
 														SPHINXCONF_HOST,

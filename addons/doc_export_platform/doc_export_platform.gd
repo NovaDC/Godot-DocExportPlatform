@@ -87,7 +87,7 @@ static func export_gdextention_xml(to_path:String, keep_open := true) -> Error:
 
 ## Function used to export loaded gdscript xml docs.
 static func export_gdscript_xml(to_path:String,
-								from_path := ProjectSettings.globalize_path("res://").rstrip("/"),
+								from_path := NovaTools.normalize_path_absolute("res://", false),
 								keep_open := true
 							   ) -> Error:
 	if not Engine.is_editor_hint():
@@ -109,8 +109,9 @@ static func doc_xml_to_rst(xml_root_path:String,
 	if not Engine.is_editor_hint():
 		return ERR_UNAVAILABLE
 
-	xml_root_path = ProjectSettings.globalize_path(xml_root_path).rstrip("/")
-	out_path = ProjectSettings.globalize_path(out_path).rstrip("/")
+
+	xml_root_path = NovaTools.normalize_path_absolute(xml_root_path, false)
+	out_path = NovaTools.normalize_path_absolute(out_path, false)
 
 	var err := NovaTools.ensure_absolute_dir_exists(out_path)
 	if err != OK:
@@ -138,9 +139,9 @@ static func doc_rst_to_other(rst_path:String,
 							) -> Error:
 	if not Engine.is_editor_hint():
 		return ERR_UNAVAILABLE
-	rst_path = ProjectSettings.globalize_path(rst_path)
-	out_path = ProjectSettings.globalize_path(out_path)
-	conf_path = ProjectSettings.globalize_path(conf_path)
+	rst_path = NovaTools.normalize_path_absolute(rst_path, false)
+	out_path = NovaTools.normalize_path_absolute(out_path, false)
+	conf_path = NovaTools.normalize_path_absolute(conf_path, false)
 
 	var args := []
 	if builder_name != "":
@@ -277,7 +278,7 @@ func _export_hook(preset: EditorExportPreset, path: String):
 	#no need to check
 	if preset.get_or_env("domains/export_gdscript", ""):
 		err = await export_gdscript_xml(xml_path,
-										ProjectSettings.globalize_path("res://").rstrip("/"),
+										NovaTools.normalize_path_absolute("res://", false),
 										keep_open
 									   )
 		if err != OK:
@@ -294,9 +295,7 @@ func _export_hook(preset: EditorExportPreset, path: String):
 	if want_rst or wanted_sphinx_builds.size() > 0:
 		err = await doc_xml_to_rst(xml_path,
 								   rst_path,
-								   ProjectSettings.globalize_path(
-										   preset.get_or_env("formats/rst/make_rst_script_path", "")
-																 ),
+								   preset.get_or_env("formats/rst/make_rst_script_path", ""),
 								   keep_open
 								  )
 		if err != OK:
