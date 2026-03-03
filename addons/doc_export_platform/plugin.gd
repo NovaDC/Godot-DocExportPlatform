@@ -42,7 +42,8 @@ var _export_platform_ref:DocEditorExportPlatform = null
 ## This command is effectively the equivlent to clicking the setup make rst command
 ## in the [kbd]Project > NovaTools[/kbd] menu.
 static func setup_make_rst():
-	assert(Engine.is_editor_hint())
+	if not Engine.is_editor_hint():
+		return ERR_UNAVAILABLE
 
 	var on_conf := func(at_path:String):
 		var err :=  NovaTools.ensure_absolute_dir_exists(at_path)
@@ -84,7 +85,8 @@ static func setup_make_rst():
 ## This command is effectively the equivlent to clicking the setup sphinx conf command
 ## in the [kbd]Project > NovaTools[/kbd] menu.
 static func download_sphinx_conf():
-	assert(Engine.is_editor_hint())
+	if not Engine.is_editor_hint():
+		return ERR_UNAVAILABLE
 
 	var on_conf := func (to_path:String):
 		if to_path == "":

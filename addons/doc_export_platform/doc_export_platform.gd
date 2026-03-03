@@ -36,11 +36,33 @@ const SPHINX_BUILDER_NAME_FLAG := "-M"
 ## The cli flag for sphinx to manually specify the configuration directory location.
 const SPHINX_CONF_DIR_FLAG := "--conf-dir"
 
+static func godot_exit_as_gd_error(exit_code:int) -> int:
+	match(exit_code):
+		0:
+			return OK
+		_:
+			return FAILED
+
+static func xml_to_rst_exit_as_gd_error(exit_code:int) -> int:
+	match(exit_code):
+		0:
+			return OK
+		_:
+			return FAILED
+
+static func sphinx_exit_as_gd_error(exit_code:int) -> int:
+	match(exit_code):
+		0:
+			return OK
+		_:
+			return FAILED
+
 ## Function used to export builtin xml docs.
 static func export_builtin_xml(to_path:String, include_base_types:=true,
 							   keep_open := true
 							  ) -> Error:
-	assert(Engine.is_editor_hint())
+	if not Engine.is_editor_hint():
+		return ERR_UNAVAILABLE
 
 	NovaTools.ensure_absolute_dir_exists(to_path)
 
@@ -48,29 +70,34 @@ static func export_builtin_xml(to_path:String, include_base_types:=true,
 	if not include_base_types:
 		args.append(GODOT_EXPORT_NO_BASE_TYPES_FLAG)
 
-	return await NovaTools.launch_editor_instance_async(args, "", keep_open)
+	var ret_code = await NovaTools.launch_editor_instance_async(args, "", keep_open)
+	return godot_exit_as_gd_error(ret_code)
 
 ## Function used to export loaded gdextention xml docs.
+# TODO Doc better
 static func export_gdextention_xml(to_path:String, keep_open := true) -> Error:
-	assert(Engine.is_editor_hint())
+	if not Engine.is_editor_hint():
+		return ERR_UNAVAILABLE
 
 	NovaTools.ensure_absolute_dir_exists(to_path)
 
 	var args = [GODOT_EXPORT_DOC_FLAG, to_path, GODOT_EXPORT_GDEXTENTION_FLAG]
-	return await NovaTools.launch_editor_instance_async(args, "", keep_open)
+	var ret_code = await NovaTools.launch_editor_instance_async(args, "", keep_open)
+	return godot_exit_as_gd_error(ret_code)
 
 ## Function used to export loaded gdscript xml docs.
 static func export_gdscript_xml(to_path:String,
 								from_path := ProjectSettings.globalize_path("res://").rstrip("/"),
 								keep_open := true
 							   ) -> Error:
-	assert(Engine.is_editor_hint())
+	if not Engine.is_editor_hint():
+		return ERR_UNAVAILABLE
 
 	NovaTools.ensure_absolute_dir_exists(to_path)
 
 	var args = [GODOT_EXPORT_DOC_FLAG, to_path, GODOT_EXPORT_GDSCRIPT_FLAG, from_path]
-	return await NovaTools.launch_editor_instance_async(args, "", keep_open)
-
+	var ret_code = await NovaTools.launch_editor_instance_async(args, "", keep_open)
+	return godot_exit_as_gd_error(ret_code)
 
 ## Function used to run [code]make_rst.py[/code].
 ## This is best used when the [code]python_prefix[/code] is set in editor settings.
@@ -79,7 +106,8 @@ static func doc_xml_to_rst(xml_root_path:String,
 						   rst_converter_script_path:String,
 						   keep_open := true
 						  ) -> Error:
-	assert(Engine.is_editor_hint())
+	if not Engine.is_editor_hint():
+		return ERR_UNAVAILABLE
 
 	xml_root_path = ProjectSettings.globalize_path(xml_root_path).rstrip("/")
 	out_path = ProjectSettings.globalize_path(out_path).rstrip("/")
@@ -96,7 +124,7 @@ static func doc_xml_to_rst(xml_root_path:String,
 														 "",
 														 keep_open
 														)
-	return OK if ret_code == 0 else FAILED
+	return xml_to_rst_exit_as_gd_error(ret_code)
 
 ## Function used to run [code]sphinx[/code] on generated rst documents.
 ## This is best used when the [code]python_prefix[/code] is set in editor settings.
@@ -108,6 +136,8 @@ static func doc_rst_to_other(rst_path:String,
 							 conf_path := "",
 							 keep_open := true
 							) -> Error:
+	if not Engine.is_editor_hint():
+		return ERR_UNAVAILABLE
 	rst_path = ProjectSettings.globalize_path(rst_path)
 	out_path = ProjectSettings.globalize_path(out_path)
 	conf_path = ProjectSettings.globalize_path(conf_path)
@@ -124,8 +154,7 @@ static func doc_rst_to_other(rst_path:String,
 															   "",
 															   keep_open
 															  )
-	return OK if ret_code == 0 else FAILED
-
+	return sphinx_exit_as_gd_error(ret_code)
 
 func _get_name():
 	return "Docs"
