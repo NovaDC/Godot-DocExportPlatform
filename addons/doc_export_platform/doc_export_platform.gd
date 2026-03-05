@@ -268,7 +268,7 @@ func _get_export_options():
 			"name": "formats/sphinx/sphinx_conf_path",
 			"type": TYPE_STRING,
 			"hint": PROPERTY_HINT_DIR,
-			"default_value": DocExportPlatformPlugin.get_sphinx_conf_download_path()
+			"default_value": DocExportPlatformPlugin.get_sphinx_conf_download_path().path_join(DocExportPlatformPlugin.SPHINX_CONF_ROOT_DIR).simplify_path()
 		},
 	] + super._get_export_options()
 

@@ -26,6 +26,12 @@ const SPHINXCONF_HOST := "https://codeload.github.com"
 ## The http path to download the default [code]sphinx_conf[/code] from.
 const SPHINXCONF_PATH := "/godotengine/godot-docs/zip/refs/heads/master"
 
+## The root of the sphinx conf that contains the [code]conf.py[/code] file,
+## navigated relatively from the root of the whole godot repository.[br]
+## Used for default arguments, under the assumption that the repository is already
+## properly extracted.
+const SPHINX_CONF_ROOT_DIR := "godot-docs-master"
+
 ## The name that [method setup_make_rst] is associated to in the editor's tool menu.
 const DOWNLOAD_MAKE_RST_TOOL_NAME := "Download rst Document Generator..."
 ## The name that [method download_sphinx_conf] is associated to in the editor's tool menu.
