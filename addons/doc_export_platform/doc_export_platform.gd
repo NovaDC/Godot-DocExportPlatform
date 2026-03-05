@@ -4,12 +4,19 @@ extends ToolEditorExportPlatform
 
 ## DocEditorExportPlatform
 ##
-## A export platform for godot used to export formatted api documents automatically during export.
-## This plugin expects that a python executable is available to the environment under the terminal
-## alias of [code]python[/code] or for the [code]python_prefix[/code] editor setting to be set.
-## This also expects for that python environment to already have the [code]sphinx[/code] module
-## available when exporting formats other than [code]rst[/code] or [code]xml[/code].[br]
-## Requires the NovaTools plugin as a dependency.
+## An [EditorExportPlatform] for godot used to export api documents using godot's export menu
+## into a wide array of document formats.[br]
+## Depending on the formats desired to export to, the [code]sphinx[/code] document generator
+## and/or Godot's [code]make_rst.py[/code] script (and its dependencies) must also be available.
+## This plugin also provides means for easy installation of [code]make_rst.py[/code] and
+## Godot's official sphinx conf.[br]
+##
+## Exporting documents beyond Godot's xml format will require python,
+## and exporting any format besides rst or Godot's xml will require sphinx to be installed
+## in that same python environment.
+## [br]
+## Requires the [NovaTools] plugin as a dependency.
+## [NovaTools] does not need to be enabled for this plugin to function.
 
 ## Command line argument used when godot when exporting xml documents.
 const GODOT_EXPORT_DOC_FLAG := "--doctool"
