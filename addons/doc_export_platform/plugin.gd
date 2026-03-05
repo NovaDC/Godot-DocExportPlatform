@@ -28,9 +28,9 @@ const MISC_UTILITY_COLOR_HOST := "https://raw.githubusercontent.com"
 ## from (dependency of [code]make_rst.py[/code]).
 const MISC_UTILITY_COLOR_PATH := "/godotengine/godot/refs/heads/master/misc/utility/color.py"
 ## The http host to download the default [code]sphinx_conf[/code] from.
-const SPHINXCONF_HOST := "https://codeload.github.com"
+const SPHINX_CONF_HOST := "https://codeload.github.com"
 ## The http path to download the default [code]sphinx_conf[/code] from.
-const SPHINXCONF_PATH := "/godotengine/godot-docs/zip/refs/heads/master"
+const SPHINX_CONF_PATH := "/godotengine/godot-docs/zip/refs/heads/master"
 
 ## The root of the sphinx conf that contains the [code]conf.py[/code] file,
 ## navigated relatively from the root of the whole godot repository.[br]
