@@ -51,36 +51,6 @@ const SPHINX_COMMON_FORMATS := ["applehelp",
 									"text",
 									]
 
-## Maps Godot's exit codes (the exit code returned when running as a subprocess)
-## to the in engine [enum Error] codes.[br]
-## This will always return [constant Error.OK] if the process seceded.
-static func godot_exit_as_gd_error(exit_code:int) -> int:
-	match(exit_code):
-		0:
-			return OK
-		_:
-			return FAILED
-
-## Maps the make_rst script's exit codes (the exit code returned when running as a subprocess)
-## to the in engine [enum Error] codes.[br]
-## This will always return [constant Error.OK] if the process seceded.
-static func xml_to_rst_exit_as_gd_error(exit_code:int) -> int:
-	match(exit_code):
-		0:
-			return OK
-		_:
-			return FAILED
-
-## Maps sphinx's exit codes (the exit code returned when running as a subprocess)
-## to the in engine [enum Error] codes.[br]
-## This will always return [constant Error.OK] if the process seceded.
-static func sphinx_exit_as_gd_error(exit_code:int) -> int:
-	match(exit_code):
-		0:
-			return OK
-		_:
-			return FAILED
-
 ## A function used to export builtin xml docs.[br]
 ## [param to_path] is the directory the builtin's xml docs will be exported to.[br]
 ## If [param include_base_types] is set, base [Variant] type's docs will also be exported.[br]
@@ -99,8 +69,8 @@ static func export_builtin_xml(to_path:String,
 	if not include_base_types:
 		args.append(GODOT_EXPORT_NO_BASE_TYPES_FLAG)
 
-	var ret_code = await NovaTools.launch_editor_instance_async(args, "", keep_open)
-	return godot_exit_as_gd_error(ret_code)
+	await NovaTools.launch_editor_instance_async(args, "", keep_open)
+	return OK
 
 ## Function used to export loaded gdextention xml docs.[br]
 ## There is currently no way to select certain loaded GDExtensions.[br]
@@ -115,8 +85,8 @@ static func export_gdextention_xml(to_path:String, keep_open := true) -> Error:
 	NovaTools.ensure_absolute_dir_exists(to_path)
 
 	var args = [GODOT_EXPORT_DOC_FLAG, to_path, GODOT_EXPORT_GDEXTENTION_FLAG]
-	var ret_code = await NovaTools.launch_editor_instance_async(args, "", keep_open)
-	return godot_exit_as_gd_error(ret_code)
+	await NovaTools.launch_editor_instance_async(args, "", keep_open)
+	return OK
 
 ## Function used to export loaded gdscript xml docs.[br]
 ## [param to_path] is the directory all relevant gdscript's xml docs
@@ -136,8 +106,8 @@ static func export_gdscript_xml(to_path:String,
 	NovaTools.ensure_absolute_dir_exists(to_path)
 
 	var args = [GODOT_EXPORT_DOC_FLAG, to_path, GODOT_EXPORT_GDSCRIPT_FLAG, from_path]
-	var ret_code = await NovaTools.launch_editor_instance_async(args, "", keep_open)
-	return godot_exit_as_gd_error(ret_code)
+	await NovaTools.launch_editor_instance_async(args, "", keep_open)
+	return OK
 
 ## Function used to run [code]make_rst.py[/code].[br]
 ## [param xml_root_path] is the root directory of the xml docs to convert.[br]
@@ -159,7 +129,7 @@ static func doc_xml_to_rst(xml_root_path:String,
 	out_path = NovaTools.normalize_path_absolute(out_path, false)
 	make_rst_script_path = NovaTools.normalize_path_absolute(make_rst_script_path, false)
 
-	if make_rst_script_path.is_empty() or not FileAccess.file_exists(make_rst_script_path):
+	if make_rst_script_path.is_empty():
 		return ERR_FILE_NOT_FOUND
 
 	var err := NovaTools.ensure_absolute_dir_exists(out_path)
@@ -169,12 +139,12 @@ static func doc_xml_to_rst(xml_root_path:String,
 	var args = [xml_root_path]
 	args += Array(NovaTools.get_children_dir_recursive(xml_root_path, true))
 	args += [RST_CONVERTER_OUTPUT_FLAG, out_path, RST_CONVERTER_VERBOSE_FLAG]
-	var ret_code := await NovaTools.launch_python_file_async(make_rst_script_path,
+	await NovaTools.launch_python_file_async(make_rst_script_path,
 																args,
 																"",
 																keep_open
 															)
-	return xml_to_rst_exit_as_gd_error(ret_code)
+	return OK
 
 ## Function used to run [code]sphinx[/code] on generated rst documents.[br]
 ## [param rst_path] is the root directory of the rst docs to convert.[br]
@@ -216,12 +186,12 @@ static func doc_rst_to_other(rst_path:String,
 	if conf_path != "":
 		args = args + [SPHINX_CONF_DIR_FLAG, conf_path]
 
-	var ret_code := await NovaTools.launch_python_module_async(SPHINX_MODULE_NAME,
+	await NovaTools.launch_python_module_async(SPHINX_MODULE_NAME,
 																args,
 																"",
 																keep_open
 																)
-	return sphinx_exit_as_gd_error(ret_code)
+	return OK
 
 func _get_name():
 	return "Docs"
@@ -334,14 +304,12 @@ func _has_valid_project_configuration(preset: EditorExportPreset):
 		is_valid = false
 
 	if preset.get_or_env("formats/rst/export_as_rst", "") and (make_rst_script_path.is_empty() or
-							not FileAccess.file_exists(make_rst_script_path)
+							not DirAccess.dir_exists_absolute(make_rst_script_path)
 						):
 		add_config_error("Invalid make_rst script path. Ensure this tool is installed.")
 		is_valid = false
-	if using_sphinx and (sphinx_conf_path.is_empty() or
-							not DirAccess.dir_exists_absolute(sphinx_conf_path)
-						):
-		add_config_error("Invalid sphinx conf path. Ensure this tool is installed.")
+	if using_sphinx and not sphinx_conf_path.is_empty() and not DirAccess.dir_exists_absolute(sphinx_conf_path):
+		add_config_error("Invalid sphinx conf path. Ensure this the path is correct, or leave it empty to not use.")
 		is_valid = false
 
 	return is_valid
