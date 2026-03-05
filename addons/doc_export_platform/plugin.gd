@@ -76,9 +76,9 @@ static func get_sphinx_conf_download_path() -> String:
 	return ret
 
 ## A builtin function that downloads [code]make_rst.py[/code]
-## (and it's dependencies, [code]methods.py[/code] and [code]platform_methods.py[/code]) to
-## and generates an appropriate [code]version.py[/code] file in
-## a location determined by a file selector.[br]
+## (and it's dependencies, [code]methods.py[/code], [code]platform_methods.py[/code]
+## and [code]misc.utility.color.py[/code]) and generates an appropriate
+## [code]version.py[/code] file in a location determined in a file selector.[br]
 ## This command is effectively the equivalent to clicking the setup make rst command
 ## in the [kbd]Project > NovaTools[/kbd] menu.
 static func setup_make_rst():
