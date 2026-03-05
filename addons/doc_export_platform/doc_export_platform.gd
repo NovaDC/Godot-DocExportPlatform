@@ -359,7 +359,7 @@ func _export_hook(preset: EditorExportPreset, path: String):
 		if err != OK:
 			return err
 	if preset.get_or_env("domains/export_builtin", ""):
-		err = await export_builtin_xml(xml_path, keep_open)
+		err = await export_builtin_xml(xml_path, true, keep_open)
 		if err != OK:
 			return err
 
