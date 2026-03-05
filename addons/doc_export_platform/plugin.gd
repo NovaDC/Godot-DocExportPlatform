@@ -21,6 +21,12 @@ const PLATFORM_METHODS_HOST := "https://raw.githubusercontent.com"
 ## The http path to download the default [code]platform_methods.py[/code] file
 ## from (dependency of [code]make_rst.py[/code]).
 const PLATFORM_METHODS_PATH := "/godotengine/godot/refs/heads/master/platform_methods.py"
+## The http host to download the default [code]misc.utility.color.py[/code] file
+## from (dependency of [code]make_rst.py[/code]).
+const MISC_UTILITY_COLOR_HOST := "https://raw.githubusercontent.com"
+## The http path to download the default [code]misc.utility.color.py[/code] file
+## from (dependency of [code]make_rst.py[/code]).
+const MISC_UTILITY_COLOR_PATH := "/godotengine/godot/refs/heads/master/misc/utility/color.py"
 ## The http host to download the default [code]sphinx_conf[/code] from.
 const SPHINXCONF_HOST := "https://codeload.github.com"
 ## The http path to download the default [code]sphinx_conf[/code] from.
@@ -101,6 +107,13 @@ static func setup_make_rst():
 			return err
 
 		err = await NovaTools.download_http_async(at_path.rstrip("/") + "/methods.py",
+		err = await NovaTools.download_http_async(at_path.path_join("misc").path_join("utility").path_join("color.py"),
+													MISC_UTILITY_COLOR_HOST,
+													MISC_UTILITY_COLOR_PATH
+													)
+		if err != OK:
+			return err
+
 													METHODS_HOST,
 													METHODS_PATH
 													)
