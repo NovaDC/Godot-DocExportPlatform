@@ -36,20 +36,20 @@ const SPHINX_BUILDER_NAME_FLAG := "-M"
 ## The cli flag for sphinx to manually specify the configuration directory location.
 const SPHINX_CONF_DIR_FLAG := "--conf-dir"
 ## A list of select preinstalled sphinx builders to use for inspector suggestions.
-const SPHINX_COMMON_FORMATS := ["applehelp",
-									"devhelp",
-									"dirhtml",
-									"epub",
-									"gettext",
-									"html",
-									"htmlhelp",
-									"latex",
-									"man",
-									"qthelp",
-									"singlehtml",
-									"texinfo",
-									"text",
-									]
+const SPHINX_COMMON_FORMATS:Array[String] = ["applehelp",
+												"devhelp",
+												"dirhtml",
+												"epub",
+												"gettext",
+												"html",
+												"htmlhelp",
+												"latex",
+												"man",
+												"qthelp",
+												"singlehtml",
+												"texinfo",
+												"text",
+											]
 
 ## A function used to export builtin xml docs.[br]
 ## [param to_path] is the directory the builtin's xml docs will be exported to.[br]
@@ -59,13 +59,13 @@ const SPHINX_COMMON_FORMATS := ["applehelp",
 static func export_builtin_xml(to_path:String,
 								include_base_types:=true,
 								keep_open := true
-								) -> Error:
+								) -> int:
 	if not Engine.is_editor_hint():
 		return ERR_UNAVAILABLE
 
 	NovaTools.ensure_absolute_dir_exists(to_path)
 
-	var args := [GODOT_EXPORT_DOC_FLAG, to_path]
+	var args:Array = [GODOT_EXPORT_DOC_FLAG, to_path]
 	if not include_base_types:
 		args.append(GODOT_EXPORT_NO_BASE_TYPES_FLAG)
 
@@ -78,7 +78,7 @@ static func export_builtin_xml(to_path:String,
 ## will be exported to.[br]
 ## If [param keep_open] is set, the terminal window will not automaticaly close,
 ## instead waiting for the user to close it.
-static func export_gdextention_xml(to_path:String, keep_open := true) -> Error:
+static func export_gdextention_xml(to_path:String, keep_open := true) -> int:
 	if not Engine.is_editor_hint():
 		return ERR_UNAVAILABLE
 
@@ -99,7 +99,7 @@ static func export_gdextention_xml(to_path:String, keep_open := true) -> Error:
 static func export_gdscript_xml(to_path:String,
 								from_path := NovaTools.normalize_path_absolute("res://", false),
 								keep_open := true
-								) -> Error:
+								) -> int:
 	if not Engine.is_editor_hint():
 		return ERR_UNAVAILABLE
 
@@ -120,10 +120,9 @@ static func doc_xml_to_rst(xml_root_path:String,
 							out_path:String,
 							make_rst_script_path:String,
 							keep_open := true
-							) -> Error:
+							) -> int:
 	if not Engine.is_editor_hint():
 		return ERR_UNAVAILABLE
-
 
 	xml_root_path = NovaTools.normalize_path_absolute(xml_root_path, false)
 	out_path = NovaTools.normalize_path_absolute(out_path, false)
@@ -132,7 +131,7 @@ static func doc_xml_to_rst(xml_root_path:String,
 	if make_rst_script_path.is_empty():
 		return ERR_FILE_NOT_FOUND
 
-	var err := NovaTools.ensure_absolute_dir_exists(out_path)
+	var err:int = NovaTools.ensure_absolute_dir_exists(out_path)
 	if err != OK:
 		return err
 
@@ -163,7 +162,7 @@ static func doc_rst_to_other(rst_path:String,
 								builder_name := "",
 								conf_path := "",
 								keep_open := true
-							) -> Error:
+							) -> int:
 	if not Engine.is_editor_hint():
 		return ERR_UNAVAILABLE
 
@@ -179,7 +178,7 @@ static func doc_rst_to_other(rst_path:String,
 	if conf_path.is_empty() or not DirAccess.dir_exists_absolute(conf_path):
 		return ERR_DOES_NOT_EXIST
 
-	var args := []
+	var args:Array = []
 	if builder_name != "":
 		args = [SPHINX_BUILDER_NAME_FLAG, builder_name]
 	args += [rst_path, out_path]
@@ -340,8 +339,8 @@ func _export_hook(preset: EditorExportPreset, path: String):
 	var rst_path := path.path_join("rst")
 
 	#actually desired outputs, not including the ones made for the sake of further generation
-	var want_xml := preset.get_or_env("formats/rst/export_as_xml", "")
-	var want_rst := preset.get_or_env("formats/rst/export_as_rst", "")
+	var want_xml = preset.get_or_env("formats/rst/export_as_xml", "")
+	var want_rst = preset.get_or_env("formats/rst/export_as_rst", "")
 	var wanted_sphinx_builds := _normalize_wanted_sphinx_builds(preset)
 
 	var err:int = OK

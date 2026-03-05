@@ -85,13 +85,13 @@ static func setup_make_rst():
 	if not Engine.is_editor_hint():
 		return ERR_UNAVAILABLE
 
-	var on_conf := func(at_path:String):
+	var on_conf:Callable = func(at_path:String):
 		if at_path == "":
 			return OK
 
 		at_path = NovaTools.normalize_path_absolute(at_path, false)
 
-		var err := NovaTools.ensure_absolute_dir_exists(at_path)
+		var err:int = NovaTools.ensure_absolute_dir_exists(at_path)
 		if err != OK:
 			return err
 
@@ -140,7 +140,7 @@ static func download_sphinx_conf():
 	if not Engine.is_editor_hint():
 		return ERR_UNAVAILABLE
 
-	var on_conf := func (to_path:String):
+	var on_conf:Callable = func (to_path:String):
 		if to_path == "":
 			return OK
 
@@ -150,7 +150,7 @@ static func download_sphinx_conf():
 															SPHINX_CONF_HOST,
 															SPHINX_CONF_PATH
 															)
-		var err := await NovaTools.show_wait_window_while_async("Please wait for the download...",
+		var err:int = await NovaTools.show_wait_window_while_async("Please wait for the download...",
 																	down_func
 																	)
 		if err != OK:
@@ -185,7 +185,7 @@ static func download_sphinx_conf():
 static func _add_project_setting(name:String,
 									type:Variant.Type,
 									default:Variant = null,
-									hint := PROPERTY_HINT_NONE,
+									hint:int = PROPERTY_HINT_NONE,
 									hint_string := "",
 									basic := true
 								) -> bool:
