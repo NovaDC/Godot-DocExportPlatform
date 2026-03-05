@@ -164,6 +164,14 @@ static func download_sphinx_conf():
 		if err != OK:
 			return err
 
+		var fa := FileAccess.open(to_path.path_join(".gdignore"), FileAccess.WRITE)
+		if fa == null:
+			err = FileAccess.get_open_error()
+		else:
+			fa.close()
+		if err != OK:
+			return err
+
 		return DirAccess.remove_absolute(to_path.path_join("master.zip"))
 
 	NovaTools.quick_editor_file_dialog(on_conf,
