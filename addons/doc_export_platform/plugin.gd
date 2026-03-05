@@ -90,7 +90,7 @@ static func get_sphinx_conf_download_path() -> String:
 ## in the [kbd]Project > NovaTools[/kbd] menu.
 static func setup_make_rst() -> void:
 	if not Engine.is_editor_hint():
-		return ERR_UNAVAILABLE
+		return
 
 	var on_conf:Callable = func(at_path:String):
 		if at_path == "":
@@ -147,7 +147,7 @@ static func setup_make_rst() -> void:
 ## in the [kbd]Project > NovaTools[/kbd] menu.
 static func download_sphinx_conf() -> void:
 	if not Engine.is_editor_hint():
-		return ERR_UNAVAILABLE
+		return
 
 	var on_conf:Callable = func (to_path:String):
 		if to_path == "":
@@ -226,7 +226,7 @@ static func _try_remove_project_setting(name:String) -> bool:
 # this addon are actually loaded.
 func _ensure_script_docs() -> void:
 	var edit := get_editor_interface().get_script_editor()
-	for scr in ENSURE_SCRIPT_DOCS:
+	for scr in _ENSURE_SCRIPT_DOCS:
 		edit.update_docs_from_script(scr)
 
 func _get_plugin_name() -> String:
