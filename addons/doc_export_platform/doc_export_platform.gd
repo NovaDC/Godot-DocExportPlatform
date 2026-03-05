@@ -285,6 +285,7 @@ func _get_export_option_warning(preset: EditorExportPreset, option: StringName) 
 	return ""
 
 func _has_valid_project_configuration(preset: EditorExportPreset)  -> void:
+func _has_valid_project_configuration(preset: EditorExportPreset) -> bool:
 	var is_valid := true
 	var using_sphinx:bool = _normalize_wanted_sphinx_builds(preset).size() > 0
 	var sphinx_conf_path = preset.get_or_env("formats/sphinx/sphinx_conf_path", "")
