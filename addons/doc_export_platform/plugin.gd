@@ -2,8 +2,15 @@
 class_name DocExportPlatformPlugin
 extends EditorPlugin
 
-## The internal name of this plugin.
+## The name of this plugin.
+const PLUGIN_NAME := "Doc Export Platform"
+
+## The internal name of this plugin (its containing folder's name).
 const PLUGIN_NAME_INTERNAL := "doc_export_platform"
+
+const _ENSURE_SCRIPT_DOCS:Array[Script] = [
+    preload("./doc_export_platform.gd")
+]
 
 ## The http host to download the default [code]make_rst.py[/code] file from.
 const MAKE_RST_HOST := "https://raw.githubusercontent.com"
@@ -106,7 +113,9 @@ static func setup_make_rst():
 		if err != OK:
 			return err
 
-		err = await NovaTools.download_http_async(at_path.path_join("misc").path_join("utility").path_join("color.py"),
+		var misc_utility_color_path := at_path.path_join("misc")
+		misc_utility_color_path = misc_utility_color_path.path_join("utility").path_join("color.py")
+		err = await NovaTools.download_http_async(misc_utility_color_path,
 													MISC_UTILITY_COLOR_HOST,
 													MISC_UTILITY_COLOR_PATH
 													)
@@ -212,17 +221,27 @@ static func _try_remove_project_setting(name:String) -> bool:
 	ProjectSettings.set_setting(name, null)
 	return true
 
+# Every once ands a while the script docs simply refuse to update properly.
+# This nudges the docs into a ensuring that the important scripts added by
+# this addon are actually loaded.
+func _ensure_script_docs() -> void:
+	var edit := get_editor_interface().get_script_editor()
+	for scr in ENSURE_SCRIPT_DOCS:
+		edit.update_docs_from_script(scr)
+
 func _get_plugin_name():
-	return PLUGIN_NAME_INTERNAL
+	return PLUGIN_NAME
 
 func _get_plugin_icon():
 	return NovaTools.get_editor_icon_named("Help", Vector2i.ONE * 16)
 
 func _enter_tree():
+	_ensure_script_docs()
 	if EditorInterface.is_plugin_enabled(PLUGIN_NAME_INTERNAL):
 		_try_init_platform()
 
 func _enable_plugin():
+	_ensure_script_docs()
 	_try_init_platform()
 
 func _disable_plugin():
