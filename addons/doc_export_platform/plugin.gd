@@ -88,7 +88,7 @@ static func get_sphinx_conf_download_path() -> String:
 ## [code]version.py[/code] file in a location determined in a file selector.[br]
 ## This command is effectively the equivalent to clicking the setup make rst command
 ## in the [kbd]Project > NovaTools[/kbd] menu.
-static func setup_make_rst():
+static func setup_make_rst() -> void:
 	if not Engine.is_editor_hint():
 		return ERR_UNAVAILABLE
 
@@ -145,7 +145,7 @@ static func setup_make_rst():
 ## file to a location determined from a file selector popup.[br]
 ## This command is effectively the equivalent to clicking the setup sphinx conf command
 ## in the [kbd]Project > NovaTools[/kbd] menu.
-static func download_sphinx_conf():
+static func download_sphinx_conf() -> void:
 	if not Engine.is_editor_hint():
 		return ERR_UNAVAILABLE
 
@@ -229,28 +229,28 @@ func _ensure_script_docs() -> void:
 	for scr in ENSURE_SCRIPT_DOCS:
 		edit.update_docs_from_script(scr)
 
-func _get_plugin_name():
+func _get_plugin_name() -> String:
 	return PLUGIN_NAME
 
-func _get_plugin_icon():
+func _get_plugin_icon() -> Texture2D:
 	return NovaTools.get_editor_icon_named("Help", Vector2i.ONE * 16)
 
-func _enter_tree():
+func _enter_tree() -> void:
 	_ensure_script_docs()
 	if EditorInterface.is_plugin_enabled(PLUGIN_NAME_INTERNAL):
 		_try_init_platform()
 
-func _enable_plugin():
+func _enable_plugin() -> void:
 	_ensure_script_docs()
 	_try_init_platform()
 
-func _disable_plugin():
+func _disable_plugin() -> void:
 	_try_deinit_platform()
 
-func _exit_tree():
+func _exit_tree() -> void:
 	_try_deinit_platform()
 
-func _try_init_platform():
+func _try_init_platform() -> void:
 	NovaTools.try_init_python_prefix_editor_setting()
 	_add_project_setting(_MAKE_RST_DOWNLOAD_PATH_SETTING_NAME,
 							TYPE_STRING,
@@ -269,7 +269,7 @@ func _try_init_platform():
 		_export_platform_ref = DocEditorExportPlatform.new()
 		add_export_platform(_export_platform_ref)
 
-func _try_deinit_platform():
+func _try_deinit_platform() -> void:
 	NovaTools.try_deinit_python_prefix_editor_setting()
 	_try_remove_project_setting(_MAKE_RST_DOWNLOAD_PATH_SETTING_NAME)
 	_try_remove_project_setting(_SPHINX_CONF_DOWNLOAD_PATH_SETTING_NAME)

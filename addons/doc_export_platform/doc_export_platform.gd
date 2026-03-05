@@ -192,10 +192,10 @@ static func doc_rst_to_other(rst_path:String,
 																)
 	return OK
 
-func _get_name():
+func _get_name() -> String:
 	return "Docs"
 
-func _get_logo():
+func _get_logo() -> Texture2D:
 	var size = Vector2i.ONE * floori(32 * EditorInterface.get_editor_scale())
 	return NovaTools.get_editor_icon_named("Help", size)
 
@@ -210,7 +210,7 @@ func _get_export_option_visibility(preset: EditorExportPreset, option: String) -
 		_:
 			return true
 
-func _get_export_options():
+func _get_export_options() -> Array[Dictionary]:
 	var default_conf_path := DocExportPlatformPlugin.get_sphinx_conf_download_path()
 	default_conf_path = default_conf_path.path_join(DocExportPlatformPlugin.SPHINX_CONF_ROOT_DIR)
 	default_conf_path = default_conf_path.simplify_path()
@@ -284,7 +284,7 @@ func _get_export_option_warning(preset: EditorExportPreset, option: StringName) 
 						)
 	return ""
 
-func _has_valid_project_configuration(preset: EditorExportPreset):
+func _has_valid_project_configuration(preset: EditorExportPreset)  -> void:
 	var is_valid := true
 	var using_sphinx:bool = _normalize_wanted_sphinx_builds(preset).size() > 0
 	var sphinx_conf_path = preset.get_or_env("formats/sphinx/sphinx_conf_path", "")
@@ -335,7 +335,7 @@ func _normalize_wanted_sphinx_builds(preset:EditorExportPreset) -> PackedStringA
 	builds = builds.filter(func (b): return not b.is_empty())
 	return PackedStringArray(builds)
 
-func _export_hook(preset: EditorExportPreset, path: String):
+func _export_hook(preset: EditorExportPreset, path: String) -> int:
 	path = NovaTools.normalize_path_absolute("res://".path_join(path), false)
 
 	var keep_open:bool = preset.get_or_env("keep_console_open", "")
