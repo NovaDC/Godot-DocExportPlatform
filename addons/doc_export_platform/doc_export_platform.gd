@@ -211,6 +211,9 @@ func _get_export_option_visibility(preset: EditorExportPreset, option: String) -
 			return true
 
 func _get_export_options():
+	var default_conf_path := DocExportPlatformPlugin.get_sphinx_conf_download_path()
+	default_conf_path = default_conf_path.path_join(DocExportPlatformPlugin.SPHINX_CONF_ROOT_DIR)
+	default_conf_path = default_conf_path.simplify_path()
 	return [
 		{
 			"name": "keep_console_open",
@@ -267,7 +270,7 @@ func _get_export_options():
 			"name": "formats/sphinx/sphinx_conf_path",
 			"type": TYPE_STRING,
 			"hint": PROPERTY_HINT_DIR,
-			"default_value": DocExportPlatformPlugin.get_sphinx_conf_download_path().path_join(DocExportPlatformPlugin.SPHINX_CONF_ROOT_DIR).simplify_path()
+			"default_value": default_conf_path
 		},
 	] + super._get_export_options()
 
@@ -307,9 +310,13 @@ func _has_valid_project_configuration(preset: EditorExportPreset):
 						):
 		add_config_error("Invalid make_rst script path. Ensure this tool is installed.")
 		is_valid = false
-	if using_sphinx and not sphinx_conf_path.is_empty() and not DirAccess.dir_exists_absolute(sphinx_conf_path):
-		add_config_error("Invalid sphinx conf path. Ensure this the path is correct, or leave it empty to not use.")
-		is_valid = false
+	if using_sphinx:
+		if not sphinx_conf_path.is_empty() and not DirAccess.dir_exists_absolute(sphinx_conf_path):
+			var msg := ("Invalid sphinx conf path. " +
+						"Ensure this the path is correct, or leave it empty to not use."
+						)
+			add_config_error(msg)
+			is_valid = false
 
 	return is_valid
 
