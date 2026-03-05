@@ -2,7 +2,7 @@
 
 An EditorExportPlatform for Godot used to export api documents using godot's export menu into a wide array of document formats.
 
-Depending on the formats desired to export to, the [code]sphinx[/code] document generator and/or Godot's [make_rst.py](https://github.com/godotengine/godot/blob/master/doc/tools/make_rst.py "make_rst.py as hosted on Github") script (and its dependencies) must also be available.
+Depending on the formats desired to export to, the [sphinx](https://www.sphinx-doc.org "Sphinx homepage") document generator and/or Godot's [make_rst.py](https://github.com/godotengine/godot/blob/master/doc/tools/make_rst.py "make_rst.py as hosted on Github") script (and its dependencies) must also be available.
 This plugin also provides means for easy installation of [make_rst.py](https://github.com/godotengine/godot/blob/master/doc/tools/make_rst.py "make_rst.py as hosted on Github") and [Godot's official sphinx conf](https://github.com/godotengine/godot-docs "Godot's sphinx conf as hosted on Github").
 
 ![The DocEditorExportPlatform icon](https://raw.githubusercontent.com/godotengine/godot/refs/heads/master/editor/icons/Help.svg "Icon")
