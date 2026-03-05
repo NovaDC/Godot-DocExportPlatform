@@ -373,8 +373,10 @@ func _export_hook(preset: EditorExportPreset, path: String):
 			return err
 
 	for sphinx_format in wanted_sphinx_builds:
-		var sphinx_format_stripped = sphinx_format.replace("/", "").replace(" ", "").to_lower()
-		var sphinx_path := path.path_join(sphinx_format_stripped)
+		var sphinx_format_safe := sphinx_format.replace("_", "")
+		if sphinx_format_safe in ["xml", "rst"]:
+			sphinx_format_safe += "_sphinx"
+		var sphinx_path := path.path_join(sphinx_format_safe)
 		err = await doc_rst_to_other(rst_path,
 										sphinx_path,
 										sphinx_format,
