@@ -22,7 +22,7 @@ This plugin also provides means for easy installation of make_rst.py and Godot's
 Exporting documents beyond Godot's xml format will require python, and exporting any format besides rst or Godot's xml will require sphinx to be installed in that same python environment.
 
 Requires the NovaTools plugin as a dependency. NovaTools does not need to be enabled for this plugin to function."
-config/version="v1.0.1.0"
+config/version="v1.0.2.0"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 boot_splash/image="uid://bt3xnit5xflvd"
 config/icon="uid://bt3xnit5xflvd"
