@@ -97,8 +97,12 @@ static func setup_make_rst() -> void:
 			return OK
 
 		at_path = NovaTools.normalize_path_absolute(at_path, false)
-
 		var err:int = NovaTools.ensure_absolute_dir_exists(at_path)
+		if err != OK:
+			return err
+
+		var misc_utility_path := at_path.path_join("misc").path_join("utility")
+		err = NovaTools.ensure_absolute_dir_exists(misc_utility_path)
 		if err != OK:
 			return err
 
@@ -113,9 +117,7 @@ static func setup_make_rst() -> void:
 		if err != OK:
 			return err
 
-		var misc_utility_color_path := at_path.path_join("misc")
-		misc_utility_color_path = misc_utility_color_path.path_join("utility").path_join("color.py")
-		err = await NovaTools.download_http_async(misc_utility_color_path,
+		err = await NovaTools.download_http_async(misc_utility_path.path_join("color.py"),
 													MISC_UTILITY_COLOR_HOST,
 													MISC_UTILITY_COLOR_PATH
 													)
@@ -155,21 +157,7 @@ static func download_sphinx_conf() -> void:
 
 		to_path = NovaTools.normalize_path_absolute(to_path, false)
 
-		var down_func:Callable = NovaTools.download_http_async.bind(to_path.path_join("master.zip"),
-															SPHINX_CONF_HOST,
-															SPHINX_CONF_PATH
-															)
-		var err:int = await NovaTools.show_wait_window_while_async("Please wait for the download...",
-																	down_func
-																	)
-		if err != OK:
-			return err
-		var decomp_func:Callable = NovaTools.decompress_zip_async.bind(to_path.path_join("master.zip"),
-																to_path
-																)
-		err = await NovaTools.show_wait_window_while_async("Please wait for decompression...",
-															decomp_func
-															)
+		var err:int = NovaTools.ensure_absolute_dir_exists(to_path)
 		if err != OK:
 			return err
 
@@ -178,6 +166,24 @@ static func download_sphinx_conf() -> void:
 			err = FileAccess.get_open_error()
 		else:
 			fa.close()
+		if err != OK:
+			return err
+
+		# var down_func:Callable = NovaTools.download_http_async.bind(to_path.path_join("master.zip"),
+		# 													SPHINX_CONF_HOST,
+		# 													SPHINX_CONF_PATH
+		# 													)
+		# err = await NovaTools.show_wait_window_while_async("Please wait for the download...",
+		# 															down_func
+		# 															)
+		# if err != OK:
+		# 	return err
+		var decomp_func:Callable = NovaTools.decompress_zip_async.bind(to_path.path_join("master.zip"),
+																to_path
+																)
+		err = await NovaTools.show_wait_window_while_async("Please wait for decompression...",
+															decomp_func
+															)
 		if err != OK:
 			return err
 
