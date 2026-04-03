@@ -70,7 +70,9 @@ static func export_builtin_xml(to_path:String,
 	if not Engine.is_editor_hint():
 		return ERR_UNAVAILABLE
 
-	NovaTools.ensure_absolute_dir_exists(to_path)
+	var err := NovaTools.ensure_absolute_dir_exists(to_path)
+	if err != OK:
+		return err
 
 	var args:Array = [GODOT_EXPORT_DOC_FLAG, to_path]
 	if not include_base_types:
@@ -89,7 +91,9 @@ static func export_gdextention_xml(to_path:String, keep_open := true) -> int:
 	if not Engine.is_editor_hint():
 		return ERR_UNAVAILABLE
 
-	NovaTools.ensure_absolute_dir_exists(to_path)
+	var err := NovaTools.ensure_absolute_dir_exists(to_path)
+	if err != OK:
+		return err
 
 	var args = [GODOT_EXPORT_DOC_FLAG, to_path, GODOT_EXPORT_GDEXTENTION_FLAG]
 	await NovaTools.launch_editor_instance_async(args, "", keep_open)
@@ -110,7 +114,9 @@ static func export_gdscript_xml(to_path:String,
 	if not Engine.is_editor_hint():
 		return ERR_UNAVAILABLE
 
-	NovaTools.ensure_absolute_dir_exists(to_path)
+	var err := NovaTools.ensure_absolute_dir_exists(to_path)
+	if err != OK:
+		return err
 
 	var args = [GODOT_EXPORT_DOC_FLAG, to_path, GODOT_EXPORT_GDSCRIPT_FLAG, from_path]
 	await NovaTools.launch_editor_instance_async(args, "", keep_open)
