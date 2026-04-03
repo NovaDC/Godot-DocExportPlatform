@@ -234,9 +234,13 @@ func _get_export_options() -> Array[Dictionary]:
 			"default_value": true
 		},
 		{
-			"name": "domains/export_gdscript",
-			"type": TYPE_BOOL,
-			"default_value": true
+			"name": "domains/export_gdscript_roots",
+			"type": TYPE_ARRAY,
+			"hint": PROPERTY_HINT_TYPE_STRING,
+			"hint_string": "%d/%d:" % [TYPE_STRING,
+											PROPERTY_HINT_DIR
+											],
+			"default_value": []
 		},
 		{
 			"name": "domains/export_gdextention",
@@ -306,7 +310,7 @@ func _has_valid_project_configuration(preset: EditorExportPreset) -> bool:
 	var make_rst_script_path = preset.get_or_env("formats/rst/make_rst_script_path", "")
 	make_rst_script_path = NovaTools.normalize_path_absolute(sphinx_conf_path, false)
 
-	if not (preset.get_or_env("domains/export_gdscript", "")
+	if not (not preset.get_or_env("domains/export_gdscript_roots", "").is_empty()
 			or preset.get_or_env("domains/export_gdextention", "")
 			or preset.get_or_env("domains/export_builtin", "")
 			):
@@ -318,6 +322,15 @@ func _has_valid_project_configuration(preset: EditorExportPreset) -> bool:
 			):
 		add_config_error("Must export at least one format of docs.")
 		is_valid = false
+
+	for path in preset.get_or_env("domains/export_gdscript_roots", ""):
+		var norm := NovaTools.normalize_path_absolute(path, false)
+		if norm.is_empty():
+			add_config_error("Could not resolve path %s" % [path])
+			is_valid = false
+		elif not DirAccess.dir_exists_absolute(norm):
+			add_config_error("Directory %s was not found" % [path])
+			is_valid = false
 
 	if preset.get_or_env("formats/rst/export_as_rst", "") and (make_rst_script_path.is_empty() or
 							not DirAccess.dir_exists_absolute(make_rst_script_path)
@@ -368,9 +381,9 @@ func _export_hook(preset: EditorExportPreset, path: String) -> int:
 
 	#as we know we aren't running with no desired outputs and all steps originate from xml,
 	#no need to check
-	if preset.get_or_env("domains/export_gdscript", ""):
+	for root in preset.get_or_env("domains/export_gdscript_roots", ""):
 		err = await export_gdscript_xml(xml_path,
-										NovaTools.normalize_path_absolute("res://", false),
+										NovaTools.normalize_path_absolute(root, false),
 										keep_open
 										)
 		if err != OK:
