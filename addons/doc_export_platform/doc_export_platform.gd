@@ -266,6 +266,7 @@ func _get_export_options() -> Array[Dictionary]:
 			"name": "formats/rst/make_rst_script_path",
 			"type": TYPE_STRING,
 			"hint": PROPERTY_HINT_FILE,
+			"hint_string" : "make_rst.py,*.py",
 			"default_value": DocExportPlatformPlugin.get_make_rst_download_path()
 		},
 
@@ -285,7 +286,7 @@ func _get_export_options() -> Array[Dictionary]:
 			"hint": PROPERTY_HINT_DIR,
 			"default_value": default_conf_path
 		},
-	] + super._get_export_options()
+	]
 
 func _get_export_option_warning(preset: EditorExportPreset, option: StringName) -> String:
 	match (option):
